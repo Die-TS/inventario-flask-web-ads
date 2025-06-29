@@ -15,6 +15,7 @@ Faker==33.3.0
 flasgger==0.9.7.1
 Flask==3.1.0
 fonttools==4.55.3
+gunicorn
 graphviz==0.20.3
 idna==3.10
 itsdangerous==2.2.0
