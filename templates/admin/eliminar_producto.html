@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-form-container">
+    <h1>Eliminar Producto</h1>
+
+    {% if productos %}
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-danger">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td>{{ p[0] }}</td>
+                    <td>{{ p[1] }}</td>
+                    <td>{{ p[2] }}</td>
+                    <td>${{ "%.2f"|format(p[3]) }}</td>
+                    <td>{{ p[4] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>No tienes productos registrados.</p>
+    {% endif %}
+
+    <hr class="my-4">
+
+    <form method="POST">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-group">
+            <label for="producto_id">ID del Producto a Eliminar:</label>
+            <input type="number" id="producto_id" name="producto_id" class="form-control" required>
+        </div>
+
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn btn-danger">Eliminar Producto</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-form-container">
+<h1 style="color: #21c1d6;">Platzi Fake Store</h1>
+<div class="search-container" style="background: white; padding: 2em; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 2em;">
+    <div style="display: flex; margin-bottom: 1em; gap: 1em; flex-wrap: wrap;">
+        <input type="text" id="search-input" placeholder="Buscar productos por nombre..." style="padding: 0.8em; flex: 1; min-width: 200px; font-size: 1em; border: 2px solid #e6e6e6; border-radius: 4px;" />
+        <button onclick="searchProducts()" style="padding: 0.8em 1.5em; background-color: #21c1d6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Buscar</button>
+        <button onclick="clearResults()" style="padding: 0.8em 1.5em; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Limpiar</button>
+    </div>
+    
+    <div style="display: flex; gap: 1em; margin-bottom: 1em; flex-wrap: wrap;">
+        <select id="category-select" style="padding: 0.8em; font-size: 1em; border: 2px solid #e6e6e6; border-radius: 4px; background: white;">
+            <option value="">Todas las categorías</option>
+            <!-- Las categorías se cargarán dinámicamente -->
+        </select>
+        
+        <input type="number" id="price-min" placeholder="Precio mín." style="padding: 0.8em; width: 120px; font-size: 1em; border: 2px solid #e6e6e6; border-radius: 4px;" />
+        <input type="number" id="price-max" placeholder="Precio máx." style="padding: 0.8em; width: 120px; font-size: 1em; border: 2px solid #e6e6e6; border-radius: 4px;" />
+        
+        <select id="limit-select" style="padding: 0.8em; font-size: 1em; border: 2px solid #e6e6e6; border-radius: 4px; background: white;">
+            <option value="10">10 productos</option>
+            <option value="20">20 productos</option>
+            <option value="50">50 productos</option>
+        </select>
+    </div>
+    
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary" style="padding: 0.8em 1.5em; background-color: #0f5ea4; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block;">Cancelar</a>
+</div>
+
+<div id="loading-indicator" style="display: none; text-align: center; padding: 2em;">
+    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #21c1d6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="margin-top: 1em; color: #666;">Cargando productos...</p>
+</div>
+
+<div id="error-message" style="display: none; background: #ffe6e6; color: #d63031; padding: 1em; border-radius: 4px; margin-bottom: 1em; border: 1px solid #ff9999;">
+    <strong>Error:</strong> <span id="error-text"></span>
+</div>
+
+<div id="results-info" style="display: none; margin-bottom: 1em; color: #666; font-style: italic;">
+    <!-- Información sobre los resultados -->
+</div>
+
+<div id="results-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5em; margin-top: 2em;">
+    <!-- Los resultados aparecerán aquí -->
+</div>
+</div>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.product-card {
+    background: white; 
+    border-radius: 8px; 
+    padding: 1.5em; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.product-image {
+    width: 100%; 
+    height: 200px; 
+    object-fit: contain; 
+    margin-bottom: 1em; 
+    background: #f9f9f9; 
+    border-radius: 4px;
+}
+
+.product-title {
+    color: #333; 
+    margin: 0.5em 0; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-price {
+    color: #21c1d6; 
+    font-weight: bold; 
+    font-size: 1.4em; 
+    margin: 0.5em 0;
+}
+
+.product-category {
+    display: inline-block; 
+    background: #e6f7f9; 
+    color: #21c1d6; 
+    padding: 0.3em 0.8em; 
+    border-radius: 20px; 
+    font-size: 0.8em; 
+    margin-top: 0.5em;
+}
+
+.product-description {
+    color: #666;
+    font-size: 0.9em;
+    margin: 0.5em 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
+<script>
+const API_BASE_URL = 'https://api.escuelajs.co/api/v1';
+
+// Cargar categorías al inicializar la página
+document.addEventListener('DOMContentLoaded', function() {
+    loadCategories();
+    searchProducts(); // Cargar productos iniciales
+});
+
+async function loadCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/categories`);
+        const categories = await response.json();
+        
+        const categorySelect = document.getElementById('category-select');
+        categorySelect.innerHTML = '<option value="">Todas las categorías</option>';
+        
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando categorías:', error);
+    }
+}
+
+async function searchProducts() {
+    const searchTerm = document.getElementById('search-input').value.trim();
+    const categoryId = document.getElementById('category-select').value;
+    const priceMin = document.getElementById('price-min').value;
+    const priceMax = document.getElementById('price-max').value;
+    const limit = document.getElementById('limit-select').value;
+    
+    // Mostrar indicador de carga
+    showLoading(true);
+    hideError();
+    
+    try {
+        // Construir URL con parámetros
+        const params = new URLSearchParams();
+        
+        if (searchTerm) params.append('title', searchTerm);
+        if (categoryId) params.append('categoryId', categoryId);
+        if (priceMin) params.append('price_min', priceMin);
+        if (priceMax) params.append('price_max', priceMax);
+        if (limit) params.append('limit', limit);
+        
+        const url = `${API_BASE_URL}/products?${params.toString()}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const products = await response.json();
+        displayResults(products, searchTerm, categoryId, priceMin, priceMax);
+        
+    } catch (error) {
+        console.error('Error buscando productos:', error);
+        showError('No se pudieron cargar los productos. Por favor, intenta de nuevo.');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function displayResults(products, searchTerm, categoryId, priceMin, priceMax) {
+    const resultsContainer = document.getElementById('results-container');
+    const resultsInfo = document.getElementById('results-info');
+    
+    if (!products || products.length === 0) {
+        resultsContainer.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3em; color: #666;">
+                <h3>No se encontraron productos</h3>
+                <p>Intenta con otros términos de búsqueda o filtros.</p>
+            </div>
+        `;
+        resultsInfo.style.display = 'none';
+        return;
+    }
+    
+    // Mostrar información de resultados
+    let infoText = `Mostrando ${products.length} producto${products.length !== 1 ? 's' : ''}`;
+    if (searchTerm) infoText += ` para "${searchTerm}"`;
+    resultsInfo.textContent = infoText;
+    resultsInfo.style.display = 'block';
+    
+    // Mostrar productos
+    resultsContainer.innerHTML = products.map(product => `
+        <div class="product-card">
+            <img src="${product.images && product.images[0] ? product.images[0] : 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" 
+                 alt="${product.title}" 
+                 class="product-image"
+                 onerror="this.src='https://via.placeholder.com/300x200?text=Sin+Imagen'">
+            <h3 class="product-title">${product.title}</h3>
+            <p class="product-description">${product.description || 'Sin descripción disponible'}</p>
+            <p class="product-price">$${product.price}</p>
+            <span class="product-category">${product.category ? product.category.name : 'Sin categoría'}</span>
+        </div>
+    `).join('');
+}
+
+function clearResults() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('category-select').value = '';
+    document.getElementById('price-min').value = '';
+    document.getElementById('price-max').value = '';
+    document.getElementById('limit-select').value = '10';
+    
+    searchProducts(); // Recargar todos los productos
+}
+
+function showLoading(show) {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    loadingIndicator.style.display = show ? 'block' : 'none';
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    errorText.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+function hideError() {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.style.display = 'none';
+}
+
+// Búsqueda al presionar Enter
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchProducts();
+    }
+});
+</script>
+{% endblock %}

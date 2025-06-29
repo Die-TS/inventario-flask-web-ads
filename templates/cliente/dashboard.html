@@ -1,0 +1,30 @@
+{% extends "/base.html" %}
+
+{% block content %}
+<div class="cliente-dashboard">
+    <h1>Bienvenido, {{ user.nombre }}</h1>
+    <p>Panel del Cliente</p>
+    
+    <div class="dashboard-grid">
+        <a href="{{ url_for('ver_categorias') }}" class="dashboard-card">
+            <img src="{{ url_for('static', filename='images/ver_categorias.png') }}" alt="Ver Categorías">
+            <span>Ver Categorías</span>
+        </a>
+        
+        <a href="{{ url_for('buscar_producto') }}" class="dashboard-card">
+            <img src="{{ url_for('static', filename='images/buscar_producto.png') }}" alt="Buscar Producto">
+            <span>Buscar Producto</span>
+        </a>
+        
+        <a href="{{ url_for('ver_carrito') }}" class="dashboard-card">
+            <img src="{{ url_for('static', filename='images/ver_carrito.png') }}" alt="Ver Carrito">
+            <span>Ver Carrito</span>
+        </a>
+        
+        <a href="{{ url_for('logout') }}" class="dashboard-card">
+            <img src="{{ url_for('static', filename='images/Salir.png') }}" alt="Salir">
+            <span>Salir</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

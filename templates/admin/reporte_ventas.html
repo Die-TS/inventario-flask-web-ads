@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-form-container">
+    <h1>Reporte de Ventas</h1>
+
+    <p>Presiona el botón para generar y descargar el reporte completo de tus ventas en formato Excel.</p>
+
+    <div class="form-actions mt-4">
+        <a href="{{ url_for('generar_reporte_ventas') }}" class="btn btn-primary">
+            Descargar Reporte de Ventas
+        </a>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Regresar</a>
+    </div>
+</div>
+{% endblock %}

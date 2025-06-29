@@ -1,0 +1,21 @@
+{% extends "../base.html" %}
+
+{% block content %}
+<div class="categorias-container">
+    <h1>Categorías Disponibles</h1>
+    
+    {% if categorias %}
+    <div class="categorias-grid">
+        {% for categoria_id, nombre in categorias %}
+        <a href="{{ url_for('ver_productos_por_categoria', categoria_id=categoria_id) }}" class="categoria-card">
+            <h3>{{ nombre }}</h3>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No hay categorías disponibles con productos en venta.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

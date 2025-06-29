@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="carrito-container">
+    <h1>Tu Carrito de Compras</h1>
+    
+    {% if carrito.items %}
+    <div class="carrito-items">
+        <table class="carrito-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio Unitario</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in carrito.items %}
+                <tr>
+                    <td>{{ item.nombre_producto }}</td>
+                    <td>${{ "%.2f"|format(item.precio_unitario) }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>${{ "%.2f"|format(item.precio_total) }}</td>
+                    <td>
+                        <a href="{{ url_for('eliminar_del_carrito', producto_id=item.producto_id) }}" 
+                           class="btn btn-danger btn-sm">
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                    <td colspan="2">${{ "%.2f"|format(carrito.total_a_pagar()) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        <div class="carrito-actions">
+            <a href="{{ url_for('vaciar_carrito') }}" class="btn btn-secondary">
+                Vaciar Carrito
+            </a>
+            <a href="{{ url_for('finalizar_compra') }}" class="btn btn-primary">
+                Finalizar Compra
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Tu carrito está vacío. <a href="{{ url_for('ver_productos') }}">Ver productos</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

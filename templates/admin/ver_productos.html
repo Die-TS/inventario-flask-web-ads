@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-form-container">
+    <h1>Mis Productos</h1>
+
+    {% if productos %}
+    <div class="table-responsive" style="max-height: 500px; overflow: auto;">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Categoría</th>
+                    <th>Fecha de Caducidad</th>
+                    <th>Código de Barras</th>
+                    <th>Costo de Compra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td>{{ p[0] }}</td>
+                    <td>{{ p[1] }}</td>
+                    <td>{{ p[2] }}</td>
+                    <td>${{ "%.2f"|format(p[3]) }}</td>
+                    <td>{{ p[4] }}</td>
+                    <td>{{ p[5] }}</td>
+                    <td>{{ p[6] if p[6] else 'N/A' }}</td>
+                    <td>{{ p[7] if p[7] else 'N/A' }}</td>
+                    <td>{{ "$%.2f"|format(p[8]) if p[8] else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>No tienes productos registrados.</p>
+    {% endif %}
+
+    <div class="form-actions mt-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Regresar</a>
+    </div>
+</div>
+{% endblock %}

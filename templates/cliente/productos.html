@@ -1,0 +1,41 @@
+{% extends "../base.html" %}
+
+{% block content %}
+<div class="productos-container">
+    <h1>{{ titulo }}</h1>
+    
+    {% if productos %}
+    <div class="productos-grid">
+        {% for producto in productos %}
+        <div class="producto-card">
+            <h3>{{ producto.nombre }}</h3>
+            <p>{{ producto.descripcion }}</p>
+            <p><strong>Precio:</strong> ${{ "%.2f"|format(producto.precio) }}</p>
+            <p><strong>Stock:</strong> {{ producto.stock }}</p>
+            
+            {% if producto.stock > 0 %}
+            <form method="POST" action="{{ url_for('agregar_al_carrito') }}" class="add-to-cart-form">
+                <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
+                <div class="form-group">
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" name="cantidad" min="1" max="{{ producto.stock }}" value="1">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    Agregar al Carrito
+                </button>
+            </form>
+            {% else %}
+            <div class="alert alert-warning">
+                Sin stock disponible
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No hay productos disponibles en esta categoría.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

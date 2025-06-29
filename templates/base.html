@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Incluimos Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Barra de navegación superior -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <a href="{{ url_for('index') }}">Sistema de Inventario</a>
+            </div>
+            
+            <ul class="nav-links">
+                {% if 'user' in session %}
+                    <!-- Usuario logueado -->
+                    <li class="nav-welcome">Bienvenido, {{ session['user']['nombre'] }}</li>
+                    
+                    {% if session['user']['rol'] == 'cliente' %}
+                        <!-- Menú para clientes -->
+                        <li><a href="{{ url_for('cliente_dashboard') }}"><i class="fas fa-home"></i> Inicio</a></li>
+                        <li><a href="{{ url_for('ver_categorias') }}"><i class="fas fa-list"></i> Categorías</a></li>
+                        <li><a href="{{ url_for('buscar_producto') }}"><i class="fas fa-search"></i> Buscar</a></li>
+                        <li>
+                            <a href="{{ url_for('ver_carrito') }}">
+                                <i class="fas fa-shopping-cart"></i> Carrito
+                                {% set carrito = obtener_carrito() %}
+                                {% if carrito.items %}
+                                    <span class="cart-badge">{{ carrito.items | length }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% elif session['user']['rol'] == 'vendedor' %}
+                        <!-- Menú para administradores -->
+                        <li><a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-home"></i> Inicio</a></li>
+                        
+                        <!-- Menú desplegable de Productos -->
+                        <li class="dropdown">
+                            <a href="#"><i class="fas fa-box-open"></i> Productos <i class="fas fa-caret-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('agregar_producto') }}"><i class="fas fa-plus-circle"></i> Agregar</a></li>
+                                <li><a href="{{ url_for('actualizar_producto') }}"><i class="fas fa-edit"></i> Actualizar</a></li>
+                                <li><a href="{{ url_for('ver_productos') }}"><i class="fas fa-eye"></i> Ver Productos</a></li>
+                                <li><a href="{{ url_for('eliminar_producto') }}"><i class="fas fa-trash-alt"></i> Eliminar</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li><a href="{{ url_for('registrar_venta') }}"><i class="fas fa-cash-register"></i> Registrar Venta</a></li>
+                        
+                        <!-- Menú desplegable de Reportes -->
+                        <li class="dropdown">
+                            <a href="#"><i class="fas fa-chart-line"></i> Reportes <i class="fas fa-caret-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('generar_reporte_productos') }}"><i class="fas fa-boxes"></i> Productos</a></li>
+                                <li><a href="{{ url_for('generar_reporte_ventas') }}"><i class="fas fa-receipt"></i> Ventas</a></li>
+                                <li><a href="{{ url_for('prediccion_demanda') }}"><i class="fas fa-chart-bar"></i> Predicción</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                    
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                {% else %}
+                    <!-- Usuario no logueado -->
+                    <li><a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a></li>
+                    <li><a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Registrarse</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Contenido principal -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+
+    <!-- JavaScript para los menús desplegables -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar/ocultar menús desplegables
+            const dropdowns = document.querySelectorAll('.dropdown');
+            
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.querySelector('.dropdown-menu').classList.toggle('show');
+                });
+            });
+            
+            // Cerrar menús al hacer clic fuera
+            document.addEventListener('click', function() {
+                dropdowns.forEach(dropdown => {
+                    dropdown.querySelector('.dropdown-menu').classList.remove('show');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

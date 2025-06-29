@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-form-container">
+    <h1>Actualizar Producto</h1>
+
+    <div class="product-list">
+        <h3>Productos Disponibles (más recientes primero):</h3>
+        <ul style="max-height: 200px; overflow-y: auto; padding-left: 1rem;">
+            {% if productos %}
+                {% for id, nombre in productos %}
+                    <li><strong>ID:</strong> {{ id }} — {{ nombre }}</li>
+                {% endfor %}
+            {% else %}
+                <li>No hay productos registrados.</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="admin-form">
+        <div class="form-group">
+            <label for="producto_id">ID del Producto a Actualizar:</label>
+            <input type="number" id="producto_id" name="producto_id" required>
+        </div>
+
+        <div class="form-group">
+            <label for="nombre">Nuevo Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Nueva Descripción:</label>
+            <textarea id="descripcion" name="descripcion" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="precio">Nuevo Precio:</label>
+            <input type="number" id="precio" name="precio" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label for="stock">Nuevo Stock:</label>
+            <input type="number" id="stock" name="stock" required>
+        </div>
+
+        <div class="form-group">
+            <label for="categoria_id">Nueva Categoría:</label>
+            <select id="categoria_id" name="categoria_id" required>
+                {% for id, nombre in categorias %}
+                <option value="{{ id }}">{{ nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="fecha_caducidad">Nueva Fecha de Caducidad:</label>
+            <input type="date" id="fecha_caducidad" name="fecha_caducidad">
+        </div>
+
+        <div class="form-group">
+            <label for="codigo_barras">Nuevo Código de Barras:</label>
+            <input type="text" id="codigo_barras" name="codigo_barras">
+        </div>
+
+        <div class="form-group">
+            <label for="costo_compra">Nuevo Costo de Compra:</label>
+            <input type="number" id="costo_compra" name="costo_compra" step="0.01">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
