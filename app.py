@@ -18,14 +18,19 @@ app.secret_key = 'tu_clave_secreta_aqui'
 
 swagger = Swagger(app)
 
-# Configuración de la base de datos (ajusta según tu configuración)
+from urllib.parse import urlparse
+
+# Leer DATABASE_URL desde las variables de entorno (Render la proporciona)
+url = urlparse(os.environ.get("DATABASE_URL"))
+
 DB_CONFIG = {
-    'host': os.environ['PGHOST'],
-    'user': os.environ['PGUSER'],
-    'password': os.environ['PGPASSWORD'],
-    'dbname': os.environ['PGDATABASE'],
-    'port': os.environ['PGPORT']
+    'host': url.hostname,
+    'user': url.username,
+    'password': url.password,
+    'dbname': url.path[1:],  # Le quitamos el "/" inicial
+    'port': url.port
 }
+
 
 # Configuración de la base de datos (ajusta según tu configuración)
 # DB_CONFIG = {
