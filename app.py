@@ -1190,4 +1190,4 @@ def prediccion_demanda():
 # ... (el resto del código se mantiene igual)
 ###############################
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
