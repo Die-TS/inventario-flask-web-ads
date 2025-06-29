@@ -5,6 +5,8 @@ from functools import wraps
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')  # Usa un backend que no necesita entorno gráfico
 #from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 import io
