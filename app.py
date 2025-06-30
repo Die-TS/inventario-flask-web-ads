@@ -34,15 +34,6 @@ DB_CONFIG = {
 }
 
 
-# Configuración de la base de datos (ajusta según tu configuración)
-# DB_CONFIG = {
-#     'host': 'localhost',
-#     'user': 'postgres',
-#     'password': 'dts2012',
-#     'dbname': 'inventario',
-#     'port': '5432'
-# }
-
 def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
